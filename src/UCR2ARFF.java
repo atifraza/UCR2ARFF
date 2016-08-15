@@ -39,7 +39,7 @@ public class UCR2ARFF {
         String[] splits = {"_TRAIN", "_TEST"};
         
         List<ArrayList<Double>> dsRaw = null;
-        List<Double> tsClass = new ArrayList<>();
+        List<Integer> tsClass = new ArrayList<>();
         List<String> classes = new ArrayList<>();
         ArrayList<Double> tsRaw;
         
@@ -47,6 +47,7 @@ public class UCR2ARFF {
         StringTokenizer st;
         for(String dsName : args) {
             for (String split : splits) {
+                tsClass.clear();
                 try (BufferedReader br = Files.newBufferedReader(Paths.get(srcDir).resolve(dsName+split))) {
                     dsRaw = new ArrayList<>();
                     while ((currLine = br.readLine()) != null) {
@@ -55,7 +56,7 @@ public class UCR2ARFF {
                         } else {
                             currLine = currLine.trim();
                             st = new StringTokenizer(currLine, String.valueOf(" "));
-                            tsClass.add(Double.parseDouble(st.nextToken()));
+                            tsClass.add((int)Double.parseDouble(st.nextToken()));
                             if (!classes.contains(tsClass.get(tsClass.size()-1).toString())) {
                                 classes.add(tsClass.get(tsClass.size()-1).toString());
                             }
@@ -70,10 +71,10 @@ public class UCR2ARFF {
                     
                     ArrayList<Attribute> attInfo = new ArrayList<>();
                     for (int i=0; i<dsRaw.get(0).size(); i++) {
-                        attInfo.add(new Attribute("t"+i));
+                        attInfo.add(new Attribute("att"+i));
                     }
-                    attInfo.add(new Attribute("class", classes));
-                    Instances dsWeka = new Instances(dsName+split, attInfo, dsRaw.size());
+                    attInfo.add(new Attribute("target", classes));
+                    Instances dsWeka = new Instances(dsName, attInfo, dsRaw.size());
                     dsWeka.setClassIndex(dsWeka.numAttributes()-1);
                     Instance tsWeka;
                     int i, j;
